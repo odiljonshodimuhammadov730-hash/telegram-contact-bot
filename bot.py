@@ -28,13 +28,12 @@ CYR_TO_LAT = {
     "у": "u", "ф": "f", "х": "x", "ц": "ts", "ч": "ch",
     "ш": "sh", "щ": "sh", "ъ": "", "ы": "i", "ь": "",
     "э": "e", "ю": "yu", "я": "ya",
-    "ғ": "g'", "қ": "q", "ў": "o'", "ҳ": "h",
+    "ғ": "g'", "қ": "q", "ў": "o'", "ҳ": "h"
 }
 
 
 def cyr_to_lat(text: str) -> str:
-    text = text.lower()
-    return "".join(CYR_TO_LAT.get(ch, ch) for ch in text)
+    return "".join(CYR_TO_LAT.get(ch, ch) for ch in text.lower())
 
 
 def normalize(text: str) -> str:
@@ -57,13 +56,11 @@ def levenshtein(a: str, b: str) -> int:
         row = [i]
         for j in range(1, len(b) + 1):
             cost = 0 if a[i - 1] == b[j - 1] else 1
-            row.append(
-                min(
-                    dp[i - 1][j] + 1,          # o'chirish
-                    row[j - 1] + 1,            # qo'shish
-                    dp[i - 1][j - 1] + cost,   # almashtirish
-                )
-            )
+            row.append(min(
+                dp[i - 1][j] + 1,
+                row[j - 1] + 1,
+                dp[i - 1][j - 1] + cost
+            ))
         dp.append(row)
     return dp[-1][-1]
 
@@ -108,16 +105,12 @@ async def search(update: Update, context: ContextTypes.DEFAULT_TYPE):
             best = (name, number)
 
     if best and best_score <= 2:
-        name, number = best
-        return await update.message.reply_text(f"{name}: {number}")
+        return await update.message.reply_text(f"{best[0]}: {best[1]}")
 
     await update.message.reply_text("❌ Topilmadi.")
 
 
 def main():
-    if not BOT_TOKEN:
-        raise RuntimeError("BOT_TOKEN environment o'zgaruvchisi topilmadi.")
-
     app = ApplicationBuilder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("add", add_contact))
